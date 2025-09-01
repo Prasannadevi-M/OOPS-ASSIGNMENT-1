@@ -1,0 +1,40 @@
+package oop;
+import java.nio.file.*;
+import java.io.*;
+public class SlowFileProcessor {
+		    public static void main(String[] args) throws Exception {
+		        Path dir = Paths.get("C:/Users/Public/TestFolder");
+		        WatchService ws = FileSystems.getDefault().newWatchService();
+		        dir.register(ws, StandardWatchEventKinds.ENTRY_CREATE);
+
+		        System.out.println("Watching: " + dir);
+
+		        while (true) {
+		            WatchKey key = ws.take();
+
+		            for (WatchEvent<?> event : key.pollEvents()) {
+		                Path fileName = (Path) event.context();
+		                System.out.println("New file detected: " + fileName);
+		                Path fullPath = dir.resolve(fileName);
+		                processFileSlowly(fullPath.toFile());
+		            }
+
+		            key.reset();
+		        }
+		    }
+		    private static void processFileSlowly(File file) {
+		        System.out.println("Processing file: " + file.getName());
+		        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+		            String line;
+		            while ((line = br.readLine()) != null) {
+		                System.out.println(">> " + line);
+		                Thread.sleep(1000); 
+		            }
+		            System.out.println("Finished processing: " + file.getName());
+		        } catch (Exception e) {
+		            System.out.println("Error reading file: " + e.getMessage());
+		        }
+		    }
+	}
+
+
